@@ -18,7 +18,7 @@ SIM_LEVEL[:,0,:] = 1 # start from level 1
 # run simulation
 cwl,level,perf = Neurates_sim.run_sim(NUM_SESSIONS,NUM_LEVELS,NUM_CHARACTERS,CWL_LEVEL,PERFORMANCE_LEVEL,SIM_LEVEL)
 
-
+# plots section
 def_progress = level[:,:,0]
 na_progress = level[:,:,1]
 
