@@ -1,12 +1,14 @@
 import Neurates_sim
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import colors
 
 
 
-NUM_SESSIONS = 30 # how many sessions in simulation
-NUM_LEVELS = 20 # maximum level that can be reached
-NUM_CHARACTERS = 50
+
+NUM_SESSIONS = 20 # how many sessions in simulation
+NUM_LEVELS = 10 # maximum level that can be reached
+NUM_CHARACTERS = 100
 mu, sigma = 0.5, 0.1 # mean and standard deviation
 BASE_CWL = np.random.normal(mu, sigma, NUM_CHARACTERS) # baseline level of each character's cognitive working load
 BASE_CWL = Neurates_sim.adjust_perf(BASE_CWL)
@@ -26,22 +28,72 @@ na_progress = level[:,:,1]
 sort_ind = np.argsort(BASE_CWL)
 na_prog_sorted = na_progress[sort_ind,:]
 def_prog_sorted = def_progress[sort_ind,:]
-fig, (ax1,ax2) = plt.subplots(1,2)
-im1 = ax1.imshow(na_prog_sorted)
-fig.colorbar(im1, ax=ax1)
-ax1.set_title("Progression by NeuroAdaptive")
-im2 = ax2.imshow(def_prog_sorted)
-fig.colorbar(im2, ax=ax2)
-ax2.set_title("Progression by default")
-# fig.tight_layout()
+images = []
+fig, axs = plt.subplots(1,2)
+images.append(axs[0].imshow(na_prog_sorted))
+axs[0].set_title("Progression by NeuroAdaptive")
+axs[0].set_xlabel('Session')
+axs[0].set_ylabel('Players')
+images.append(axs[1].imshow(def_prog_sorted))
+axs[1].set_title("Progression by default")
+axs[1].set_xlabel('Session')
+axs[1].set_ylabel('Players')
+# Find the min and max of all colors for use in setting the color scale.
+vmin = min(image.get_array().min() for image in images)
+vmax = max(image.get_array().max() for image in images)
+norm = colors.Normalize(vmin=vmin, vmax=vmax)
+for im in images:
+    im.set_norm(norm)
+plt.subplots_adjust(bottom=0.1, right=0.8, top=0.9, left = 0.1)
+fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1,label='Level')
+plt.show()
+# look at the difference
+diff_sorted = na_prog_sorted - def_prog_sorted
+symmetric = np.max([np.max(diff_sorted),np.abs(np.min(diff_sorted))])
+plt.imshow(diff_sorted,cmap='seismic',vmin = -symmetric,vmax = symmetric)
+plt.colorbar()
+plt.title("LEVEL Difference between protocols(NA-def)")
+plt.show()
+
+# which base cwl has benefited/got worse
+per_player = np.mean(na_prog_sorted - def_prog_sorted,axis=1)
+BASE_CWL_sorted = BASE_CWL[sort_ind]
+plt.plot(BASE_CWL_sorted,per_player,color= 'k')
+plt.xlabel("BaseLine CWL")
+plt.ylabel("Mean diff(NA-Def) of levels")
+plt.axhline(linewidth=2, color='r',ls = '--')
+plt.show()
+
+
+def_cwl = cwl[:,:,0]
+na_cwl = cwl[:,:,1]
+
+# heatmap to look at all the players together, sorted by base cwl
+na_cwl_sorted = na_cwl[sort_ind,:]
+def_cwl_sorted = def_cwl[sort_ind,:]
+images = []
+fig, axs = plt.subplots(1,2)
+images.append(axs[0].imshow(na_cwl_sorted))
+axs[0].set_title("workload by NeuroAdaptive")
+images.append(axs[1].imshow(def_cwl_sorted))
+axs[1].set_title("workload by default")
+# Find the min and max of all colors for use in setting the color scale.
+vmin = min(image.get_array().min() for image in images)
+vmax = max(image.get_array().max() for image in images)
+norm = colors.Normalize(vmin=vmin, vmax=vmax)
+for im in images:
+    im.set_norm(norm)
+plt.subplots_adjust(bottom=0.1, right=0.8, top=0.9, left = 0.1)
+fig.colorbar(images[0], ax=axs, orientation='horizontal', fraction=.1)
 plt.show()
 
 # look at the difference
-diff_sorted = na_prog_sorted - def_prog_sorted
-plt.imshow(diff_sorted,cmap='seismic')
+diff_cwl_sorted = na_cwl_sorted - def_cwl_sorted
+plt.imshow(diff_cwl_sorted,cmap='seismic')
 plt.colorbar()
-plt.title("Difference between protocols(NA-def)")
+plt.title("CWL Difference between protocols(NA-def)")
 plt.show()
+
 
 # look at data by baseline CWL per player
 base_cwl_sorted = BASE_CWL[sort_ind]
