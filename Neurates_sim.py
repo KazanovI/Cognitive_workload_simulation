@@ -24,7 +24,7 @@ def simulate_session(sess,cwl,level,perf):
             # adjust level based on CWL. this step can cause a player to jump 2 levels eventually, or alternatively
             # cancel the rise in level from the default protocol
             UP_BOUNDRY = [0.4, 0.6] # between values
-            DOWN_BOUNDRY = [0.2, 0.8] # above/below values
+            DOWN_BOUNDRY = [0.1, 0.9] # above/below values
             up_na = np.logical_and((cwl[:,sess,protocol] > UP_BOUNDRY[0]) , (cwl[:,sess,protocol] < UP_BOUNDRY[1]))
             down_na = np.logical_or((cwl[:,sess,protocol] < DOWN_BOUNDRY[0]) , (cwl[:,sess,protocol] > DOWN_BOUNDRY[1]))
             level[up_na, sess + 1, protocol] = level[up_na, sess + 1, protocol] + 1
@@ -71,7 +71,7 @@ def adjust_level(level):
     return level_ad
 
 def change_level(level_array,performance,sess,protocol):
-    PER_BOUNDRY = [0.5, 0.8] # change level below/above performance boundary
+    PER_BOUNDRY = [0.55, 0.9] # change level below/above performance boundary
     ind_down = performance <= PER_BOUNDRY[0]
     ind_up = performance >= PER_BOUNDRY[1]
     level_array[ind_up, sess + 1, protocol] = level_array[ind_up, sess, protocol] + 1
@@ -82,9 +82,9 @@ def change_level(level_array,performance,sess,protocol):
     return level_array
 
 def change_cwl(cwl,level,sess,protocol):
-    level_rep = 0.2
-    level_down = 0.3
-    level_up = 0.3
+    level_rep = 0.1
+    level_down = 0.2
+    level_up = 0.2
     # check the direction the cwl needs to be adjusted towards
     too_easy_ind = cwl[:, sess - 1, protocol] < 0.5
     too_hard_ind = cwl[:, sess - 1, protocol] > 0.5
