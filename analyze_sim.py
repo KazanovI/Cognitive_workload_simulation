@@ -5,7 +5,7 @@ from matplotlib import colors
 from scipy.stats import sem
 
 NUM_SESSIONS = 20  # how many sessions in simulation
-NUM_LEVELS = 10  # maximum level that can be reached
+NUM_LEVELS = 15  # maximum level that can be reached
 NUM_CHARACTERS = 100
 mu, sigma = 0.5, 0.1  # mean and standard deviation
 BASE_CWL = np.random.normal(mu, sigma, NUM_CHARACTERS)  # baseline level of each character's cognitive working load
@@ -21,15 +21,10 @@ for it in range(n_iter):
     PERFORMANCE_LEVEL = np.array(np.zeros((NUM_CHARACTERS, NUM_SESSIONS, 2)))
     SIM_LEVEL = np.array(np.zeros((NUM_CHARACTERS, NUM_SESSIONS, 2)))  # level reached in simulation
     SIM_LEVEL[:, 0, :] = 1  # start from level 1
-    cwl, level, perf = Neurates_sim.run_sim(NUM_SESSIONS,
-                                            NUM_LEVELS,
-                                            NUM_CHARACTERS,
-                                            CWL_LEVEL,
-                                            PERFORMANCE_LEVEL,
-                                            SIM_LEVEL)
-    cwl_iter[:, :, :, it] = cwl
-    level_iter[:, :, :, it] = level
-    perf_iter[:, :, :, it] = perf
+    Neurates_sim.run_sim(NUM_SESSIONS,NUM_LEVELS,NUM_CHARACTERS,CWL_LEVEL,PERFORMANCE_LEVEL,SIM_LEVEL)
+    cwl_iter[:, :, :, it] = CWL_LEVEL
+    level_iter[:, :, :, it] = SIM_LEVEL
+    perf_iter[:, :, :, it] = PERFORMANCE_LEVEL
 # mean over iterations
 m_cwl = np.mean(cwl_iter, axis=3)
 m_level = np.mean(level_iter, axis=3)

@@ -8,7 +8,7 @@ def simulate_session(sess, cwl, level, perf):
         # adjust CWL based on previous levels
         if sess != 0:
             # change cognitive workload based on previous session
-            cwl = change_cwl(cwl, level, sess, protocol)
+            change_cwl(cwl, level, sess, protocol)
         # get performance level from each player
         level_per = calc_performance(cwl[:, sess, protocol])
         level_per = level_per + rand_noise
@@ -18,10 +18,10 @@ def simulate_session(sess, cwl, level, perf):
         if sess < N_SESSIONS - 1:
             if protocol == 0:  # default
                 # adjust level based on performance
-                level = change_level(level, level_per_ad, sess, protocol)
+                change_level(level, level_per_ad, sess, protocol)
             elif protocol == 1:  # neuro-adaptive
                 # adjust level based on performance
-                level = change_level(level, level_per_ad, sess, protocol)
+                change_level(level, level_per_ad, sess, protocol)
                 # adjust level based on CWL. this step can cause a player to jump 2 levels eventually, or alternatively
                 # cancel the rise in level from the default protocol
                 UP_BOUNDRY = [0.45, 0.55]  # between values
@@ -34,7 +34,7 @@ def simulate_session(sess, cwl, level, perf):
                 level[down_na, sess + 1, protocol] = level[down_na, sess + 1, protocol] - 1
                 level[~up_na & ~down_na, sess + 1, protocol] = level[~up_na & ~down_na, sess + 1, protocol]
                 # check not exceeding level boundaries [1 20]
-            level[:, :, protocol] = adjust_level(level[:, :, protocol])
+            adjust_level(level[:, :, protocol])
     return cwl, level, perf  # returns output of session
 
 
@@ -80,7 +80,7 @@ def change_level(level_array, performance, sess, protocol):
     level_array[ind_down, sess + 1, protocol] = level_array[ind_down, sess, protocol] - 1
     level_array[~ind_up & ~ind_down, sess + 1, protocol] = level_array[~ind_up & ~ind_down, sess, protocol]
     # check not exceeding level boundaries [1 20]
-    level_array[:, :, protocol] = adjust_level(level_array[:, :, protocol])
+    adjust_level(level_array[:, :, protocol])
     return level_array
 
 
@@ -110,7 +110,7 @@ def change_cwl(cwl, level, sess, protocol):
             cwl[down_ind & too_hard_ind, sess - 1, protocol] * -level_down)
     cwl[down_ind & ~too_easy_ind & ~too_hard_ind, sess, protocol] = cwl[
         down_ind & ~too_easy_ind & ~too_hard_ind, sess - 1, protocol]
-    cwl = adjust_perf(cwl)
+    adjust_perf(cwl)
     return cwl
 
 
@@ -121,10 +121,7 @@ def run_sim(NUM_SESSIONS, NUM_LEVELS, NUM_CHARACTERS, CWL_LEV, PERFORMANCE_LEV, 
     N_SESSIONS = NUM_SESSIONS
     for sess in range(NUM_SESSIONS):
         # pass the "players" properties and return data
-        cwl_next, level_next, perf_next = simulate_session(sess, CWL_LEV, SIM_LEV, PERFORMANCE_LEV)
-        CWL_LEV = cwl_next
-        SIM_LEV = level_next
-        PERFORMANCE_LEV = perf_next
+        simulate_session(sess, CWL_LEV, SIM_LEV, PERFORMANCE_LEV)
     return CWL_LEV, SIM_LEV, PERFORMANCE_LEV
 
 
