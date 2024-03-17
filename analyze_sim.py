@@ -5,7 +5,7 @@ from matplotlib import colors
 from scipy.stats import sem
 
 NUM_SESSIONS = 20  # how many sessions in simulation
-NUM_LEVELS = 15  # maximum level that can be reached
+NUM_LEVELS = 20  # maximum level that can be reached
 NUM_CHARACTERS = 100
 mu, sigma = 0.5, 0.1  # mean and standard deviation
 BASE_CWL = np.random.normal(mu, sigma, NUM_CHARACTERS)  # baseline level of each character's cognitive working load
@@ -132,6 +132,34 @@ ax.yaxis.grid(True)
 plt.tight_layout()
 # plt.show()
 
+# ts of each protocol level progression
+level_na_binned_ts2 = [
+    (na_prog_sorted[bins[bin]:bins[bin + 1], :]).mean(axis=0)
+    for bin in range(len(bins) - 1)]
+level_def_binned_ts2 = [
+    (def_prog_sorted[bins[bin]:bins[bin + 1], :]).mean(axis=0)
+    for bin in range(len(bins) - 1)]
+level_na_binned_std_ts2 = [
+    sem((na_prog_sorted[bins[bin]:bins[bin + 1], :]))
+    for bin in range(len(bins) - 1)]
+level_def_binned_std_ts2 = [
+    sem((def_prog_sorted[bins[bin]:bins[bin + 1], :]))
+    for bin in range(len(bins) - 1)]
+
+fig,axs = plt.subplots(figsize = (6,4))
+for line in range(len(level_na_binned_ts2)):
+    axs.plot(level_na_binned_ts2[line], label=lbls[line] + " NA")
+    axs.fill_between(np.arange(level_na_binned_ts2[line].shape[0]), level_na_binned_ts2[line] -
+                     level_na_binned_std_ts2[line], level_na_binned_ts2[line] + level_na_binned_std_ts2[line], alpha=0.2)
+    axs.plot(level_def_binned_ts2[line], label=lbls[line] + " DEF")
+    axs.fill_between(np.arange(level_def_binned_ts2[line].shape[0]), level_def_binned_ts2[line] -
+                     level_def_binned_std_ts2[line], level_def_binned_ts2[line] + level_def_binned_std_ts2[line], alpha=0.2)
+axs.set_xlabel('Session')
+axs.set_ylabel('Level')
+axs.set_title('Level by protocol, bin, and session')
+plt.legend()
+# plt.show()
+
 # line plot
 level_data_binned_ts = [
     (na_prog_sorted[bins[bin]:bins[bin + 1], :] - def_prog_sorted[bins[bin]:bins[bin + 1], :]).mean(axis=0)
@@ -148,10 +176,10 @@ axs.set_xlabel('Session')
 axs.set_ylabel('Level diff')
 axs.set_title('Level diff by bin and session')
 plt.legend()
-plt.show()
+# plt.show()
 
 # look at data by baseline CWL per player
-by_player = False
+by_player = True
 if by_player:
     base_cwl_sorted = BASE_CWL[sort_ind]
     plt.style.use("ggplot")
